@@ -1,0 +1,1 @@
+SUBSYSTEM=="power_supply", ACTION=="change", ENV{POWER_SUPPLY_NAME}=="ADP1", TAG+="systemd", ENV{SYSTEMD_WANTS}="auto-power-profile.service"
