@@ -26,6 +26,12 @@ Automatically switches between Performance and Balanced power profiles based on 
 
 **Topics:** Bash · systemd · udev · D-Bus · TuneD · Linux power management
 
+### [MAONO DGM20 PipeWire Troubleshooting](./dgm20-pipewire-fix/)
+
+Troubleshooting a USB microphone that was detected by Fedora but exposed through the wrong PipeWire audio profile.
+
+**Topics:** PipeWire · PulseAudio compatibility · ALSA · `wpctl` · `pactl` · USB audio · Linux troubleshooting
+
 ## Skills Demonstrated
 
 - Fedora Linux administration
@@ -38,6 +44,8 @@ Automatically switches between Performance and Balanced power profiles based on 
 - Secure Boot
 - HID/HIDRAW
 - POSIX ACLs
+- PipeWire
+- ALSA
 - Hardware troubleshooting
 - System automation
 - Technical documentation
