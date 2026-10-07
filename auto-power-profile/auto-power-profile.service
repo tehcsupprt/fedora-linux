@@ -1,0 +1,7 @@
+[Unit]
+Description=Automatically switch power profile based on AC power
+After=tuned-ppd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/auto-power-profile.sh
