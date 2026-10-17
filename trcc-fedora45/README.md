@@ -1,17 +1,17 @@
-# Thermalright TRCC on Fedora 45
+# Thermalright TRCC on Fedora KDE 45
 
-This document records troubleshooting steps for Thermalright TRCC (TRCC Linux) after upgrading Fedora Workstation from Fedora 44 to Fedora 45.
+This page documents troubleshooting Thermalright TRCC (TRCC Linux) on **Fedora KDE Plasma 45** after upgrading from Fedora 44.
 
-> **Status: Work in progress.** The original Fedora 44 RPM failed dependency resolution. Installing TRCC through `pipx` has also encountered build dependency errors. A working installation has not yet been confirmed.
+> **Status: Working.** TRCC is now running on this Fedora KDE system. The exact final step that resolved the installation has not yet been recorded, so it should not be guessed.
 
 ## Environment
 
-- Operating system: Fedora Workstation 45
-- Kernel: `7.2.9-300.fc45.x86_64`
+- Operating system: Fedora KDE Plasma 45
+- Kernel recorded during troubleshooting: `7.2.9-300.fc45.x86_64`
 - Secure Boot: Enabled
 - Upstream project: [Thermalright TRCC Linux Releases](https://github.com/Lexonight1/thermalright-trcc-linux/releases)
 
-## 1. What Happened
+## What happened
 
 During the Fedora 44 to Fedora 45 upgrade, the installed package was:
 
@@ -19,23 +19,20 @@ During the Fedora 44 to Fedora 45 upgrade, the installed package was:
 
 The RPM required Python 3.14 dependencies, while the Fedora 45 environment used Python 3.15. DNF could not satisfy those requirements, and the package was removed during dependency resolution.
 
-This does not establish that TRCC itself is incompatible with Fedora 45. It means the existing Fedora 44 RPM's declared dependencies did not match the upgraded system.
+This did not mean TRCC itself could not run on Fedora 45. It meant the existing Fedora 44 RPM's declared dependencies did not match the upgraded system.
 
-## 2. Verify the System
-
-Run these commands to check the current environment:
+## Verify the system
 
 ```bash
 cat /etc/fedora-release
+echo "$XDG_CURRENT_DESKTOP"
 uname -r
 mokutil --sb-state
 rpm -q trcc-linux
 command -v trcc
 ```
 
-After the upgrade, Fedora 45 was confirmed, Secure Boot remained enabled, and the original TRCC RPM was no longer installed.
-
-## 3. Attempt 1: Install the Upstream RPM
+## Attempt 1: Install the upstream RPM
 
 The following command was attempted:
 
@@ -45,109 +42,76 @@ sudo dnf install https://github.com/Lexonight1/thermalright-trcc-linux/releases/
 
 The download succeeded, but dependency resolution failed because the RPM required Python 3.14 dependencies that were unavailable in the Fedora 45 environment.
 
-**Do not force-install the incompatible RPM or bypass its dependencies.**
+Do not force-install the incompatible RPM or bypass its dependencies.
 
-## 4. Attempt 2: Install Through pipx
+## Attempt 2: Install through pipx
 
-The goal is to install TRCC in an isolated Python environment rather than relying on the incompatible Fedora 44 RPM.
+The goal was to install TRCC in an isolated Python environment instead of relying on the incompatible Fedora 44 RPM.
 
-### 4.1 Install runtime dependencies
-
-The following packages were installed:
+### Runtime dependencies
 
 ```bash
 sudo dnf install pipx sg3_utils python3-pyside6 portaudio ffmpeg
 ```
 
-### 4.2 Install build dependencies
+### Build dependencies
 
-The first `pipx install trcc-linux` attempt failed while building `hidapi` because libusb development metadata was missing.
-
-The following packages were installed:
+The first `pipx install trcc-linux` attempt failed while building `hidapi` because libusb development metadata was missing. These packages were then installed:
 
 ```bash
 sudo dnf install libusb1-devel pkgconf-pkg-config gcc python3-devel
 ```
 
-A subsequent installation attempt failed while compiling the HIDRAW backend with this error:
+A subsequent build attempt reported a missing libudev header:
 
 ```text
 fatal error: libudev.h: No such file or directory
 ```
 
-### 4.3 Next troubleshooting step
-
-Install the Fedora package that provides the libudev development header:
+The next troubleshooting step identified was:
 
 ```bash
 sudo dnf install systemd-devel
 ```
 
-Then retry the installation:
+TRCC is now working, but this page does not claim that the command above alone was the final fix.
 
-```bash
-pipx install trcc-linux
-```
+## Check the installed CLI
 
-If the previous attempt left an incomplete environment, inspect the pipx installations:
-
-```bash
-pipx list
-```
-
-If necessary, remove only the failed TRCC pipx environment and retry:
-
-```bash
-pipx uninstall trcc-linux
-pipx install trcc-linux
-```
-
-Do not uninstall or replace the system Python. Do not use `sudo pip` or bypass system package protections.
-
-## 5. If Installation Succeeds
-
-Only after `pipx install trcc-linux` completes successfully, check the available CLI commands:
+To inspect the commands provided by the installed version:
 
 ```bash
 trcc --help
 ```
 
-If supported by the installed version, try:
+The following commands were considered during troubleshooting; use them only if supported by the installed CLI:
 
 ```bash
 trcc system setup
 trcc gui
 ```
 
-Confirm the commands against the installed CLI help and upstream documentation. These commands have not yet been verified on this Fedora 45 installation.
+## Findings
 
-## 6. Verified Findings
-
-The following observations have been confirmed:
-
-- The Fedora 44 to Fedora 45 upgrade completed.
+- Fedora 45 upgrade completed successfully.
 - Secure Boot remained enabled.
-- The original `trcc-linux` RPM was absent after the upgrade.
-- The upstream Fedora 44 RPM failed dependency resolution because of its Python 3.14 requirements.
-- The first pipx build encountered missing libusb development metadata.
-- After installing libusb development files and build tools, the next build attempt reported a missing `libudev.h` header.
+- The Fedora 44 TRCC RPM was removed because its Python dependency requirements could not be satisfied.
+- Installing TRCC through the upstream RPM failed dependency resolution.
+- The pipx build initially required libusb development metadata and later reported a missing `libudev.h` header.
+- TRCC is now working on Fedora KDE Plasma 45.
 
-## 7. Remaining Tasks
+## Follow-up
 
-- [ ] Install `systemd-devel`.
-- [ ] Retry `pipx install trcc-linux`.
-- [ ] Resolve any additional build or runtime dependencies.
-- [ ] Confirm that TRCC launches successfully on Fedora 45.
-- [ ] Verify that the TRCC GUI detects and communicates with the Thermalright hardware.
-- [ ] Update this document with the final working installation procedure.
-- [ ] Update the status at the top once the installation and hardware tests succeed.
+- [ ] Record the exact final commands that resulted in a working installation.
+- [ ] Confirm the TRCC GUI detects and communicates with the Thermalright hardware.
+- [ ] Update the troubleshooting steps with any additional dependency packages that were required.
 
-## 8. References
+## References
 
-- [Thermalright TRCC Linux GitHub Repository](https://github.com/Lexonight1/thermalright-trcc-linux)
-- [Thermalright TRCC Linux Releases](https://github.com/Lexonight1/thermalright-trcc-linux/releases)
-- [pipx Documentation](https://pipx.pypa.io/stable/)
+- [Thermalright TRCC Linux repository](https://github.com/Lexonight1/thermalright-trcc-linux)
+- [Thermalright TRCC Linux releases](https://github.com/Lexonight1/thermalright-trcc-linux/releases)
+- [pipx documentation](https://pipx.pypa.io/stable/)
 
 ## Notes
 
-This document is a troubleshooting log, not a confirmed end-to-end installation guide. The steps that remain untested are explicitly marked above. Update the documentation only after the relevant commands and hardware behavior have been verified.
+This is a record of the Fedora KDE troubleshooting process. The current installation works; the precise final fix should be added after confirming which command or dependency resolved the remaining issue.
