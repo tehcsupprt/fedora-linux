@@ -32,6 +32,12 @@ Troubleshooting a USB microphone that was detected by Fedora but exposed through
 
 **Topics:** PipeWire · PulseAudio compatibility · ALSA · `wpctl` · `pactl` · USB audio · Linux troubleshooting
 
+### [Thermalright TRCC on Fedora 45](./trcc-fedora45/)
+
+A working TRCC setup on Fedora 45, documenting the installation, dependency troubleshooting, and compilation process.
+
+**Topics:** Fedora Linux · Python · C compilation · Build dependencies · pkg-config · libusb · Linux hardware utilities
+
 ## Skills Demonstrated
 
 - Fedora Linux administration
